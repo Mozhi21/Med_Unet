@@ -30,8 +30,8 @@ def train_model(
         model,
         device,
         epochs: int = 15,
-        # Mozhi：lets try 4， just for testing
-        batch_size: int = 4,
+        # Mozhi：lets try 32， just for testing
+        batch_size: int = 32,
         learning_rate: float = 1e-5,
         val_percent: float = 0.1,
         save_checkpoint: bool = True,
