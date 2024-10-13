@@ -26,7 +26,9 @@ def load_image(filename):
 
 
 def unique_mask_values(idx, mask_dir, mask_suffix):
-    mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
+    mask_idx = idx.replace('img_', 'mask_')
+    mask_file = list(mask_dir.glob(mask_idx + mask_suffix + '.*'))[0]
+    # mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
     mask = np.asarray(load_image(mask_file))
     if mask.ndim == 2:
         return np.unique(mask)
@@ -123,11 +125,13 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, idx):
         name = self.ids[idx]
-        mask_file = list(self.mask_dir.glob(name + self.mask_suffix + '.*'))
+        mask_name = name.replace('img_', 'mask_')
+
+        mask_file = list(self.mask_dir.glob(mask_name + self.mask_suffix + '.*'))
         img_file = list(self.images_dir.glob(name + '.*'))
 
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'
-        assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {name}: {mask_file}'
+        assert len(mask_file) == 1, f'Either no mask or multiple masks found for the ID {mask_name}: {mask_file}'
         mask = load_image(mask_file[0])
         img = load_image(img_file[0])
 

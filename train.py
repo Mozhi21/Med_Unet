@@ -30,7 +30,8 @@ def train_model(
         model,
         device,
         epochs: int = 15,
-        batch_size: int = 1,
+        # Mozhi：lets try 4， just for testing
+        batch_size: int = 4,
         learning_rate: float = 1e-5,
         val_percent: float = 0.1,
         save_checkpoint: bool = True,
@@ -62,7 +63,10 @@ def train_model(
     train_set, val_set = random_split(dataset, [n_train, n_val], generator=torch.Generator().manual_seed(0))
 
     # 3. Create data loaders
-    loader_args = dict(batch_size=batch_size, num_workers=os.cpu_count(), pin_memory=True)
+    # MOzhi： try less workers to free more GRAM
+    # loader_args = dict(batch_size=batch_size, num_workers=os.cpu_count(), pin_memory=True)
+    loader_args = dict(batch_size=batch_size, num_workers=4, pin_memory=True)
+
     train_loader = DataLoader(train_set, shuffle=True, **loader_args)
     val_loader = DataLoader(val_set, shuffle=False, drop_last=True, **loader_args)
 
@@ -162,13 +166,14 @@ def train_model(
                 division_step = (n_train // (5 * batch_size))
                 if division_step > 0:
                     if global_step % division_step == 0:
-                        histograms = {}
-                        for tag, value in model.named_parameters():
-                            tag = tag.replace('/', '.')
-                            if not (torch.isinf(value) | torch.isnan(value)).any():
-                                histograms['Weights/' + tag] = wandb.Histogram(value.data.cpu())
-                            if not (torch.isinf(value.grad) | torch.isnan(value.grad)).any():
-                                histograms['Gradients/' + tag] = wandb.Histogram(value.grad.data.cpu())
+                        # Mozhi: this histograms seems to be not ultilized, block it for now to free more GRAM.
+                        # histograms = {}
+                        # for tag, value in model.named_parameters():
+                        #     tag = tag.replace('/', '.')
+                        #     if not (torch.isinf(value) | torch.isnan(value)).any():
+                        #         histograms['Weights/' + tag] = wandb.Histogram(value.data.cpu())
+                        #     if not (torch.isinf(value.grad) | torch.isnan(value.grad)).any():
+                        #         histograms['Gradients/' + tag] = wandb.Histogram(value.grad.data.cpu())
 
                         val_loss, val_score = evaluate(model, val_loader, device, amp)
                         # print("back_loss: " + str(val_loss))
