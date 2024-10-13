@@ -27,8 +27,12 @@ def load_image(filename):
 
 def unique_mask_values(idx, mask_dir, mask_suffix):
     mask_idx = idx.replace('img_', 'mask_')
-    mask_file = list(mask_dir.glob(mask_idx + mask_suffix + '.*'))[0]
+    mask_files = list(mask_dir.glob(mask_idx + mask_suffix + '.*'))
     # mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
+    if not mask_files:
+        print(f"Mask file not found for idx: {idx}, mask_idx: {mask_idx}")
+        raise FileNotFoundError(f"Mask file not found for idx: {idx}, mask_idx: {mask_idx}")
+    mask_file = mask_files[0] 
     mask = np.asarray(load_image(mask_file))
     if mask.ndim == 2:
         return np.unique(mask)
